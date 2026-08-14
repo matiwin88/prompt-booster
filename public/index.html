@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Booster Studio</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        customDark: '#25282B',
+                        customLime: '#10cb00',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #10cb00;
+            color: #25282B;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #25282B;
+            border-radius: 999px;
+        }
+
+        .btn-outline {
+            background-color: #10cb00;
+            border: 1px solid #25282B;
+            color: #25282B;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-outline:hover {
+            background-color: #25282B;
+            color: #10cb00;
+        }
+
+        .btn-active {
+            background-color: #25282B;
+            border: 1px solid #25282B;
+            color: #10cb00;
+            font-weight: 700;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .active-trend {
+            background: #25282B !important;
+            color: #10cb00 !important;
+            border-color: #25282B !important;
+            font-weight: 700;
+        }
+
+        .custom-select-trigger {
+            background-color: transparent;
+            border: 1px solid #25282B;
+            color: #25282B;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            user-select: none;
+        }
+        .custom-select-trigger:hover, .custom-select-trigger:focus-within, .custom-select-trigger.active {
+            background-color: rgba(37,40,43,0.05);
+            outline: none;
+        }
+        .custom-select-dropdown {
+            background-color: #10cb00;
+            border: 2px solid #25282B;
+            max-height: 240px;
+            overflow-y: auto;
+            z-index: 50;
+        }
+        .custom-select-option {
+            padding: 10px 14px;
+            color: #25282B;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+        .custom-select-option:hover {
+            background-color: rgba(37,40,43,0.1);
+        }
+        .custom-select-option.selected {
+            background-color: #25282B;
+            color: #10cb00;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen flex flex-col selection:bg-[#25282B] selection:text-[#10cb00] pb-16">
+
+    <header class="pt-10 pb-6 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full text-center space-y-4">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-sans font-black uppercase tracking-tight text-[#25282B]">
+            PROMPT BOOSTER
+        </h1>
+
+        <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <div class="border border-[#25282B] rounded-full p-1.5 flex items-center shrink-0">
+                <button id="btnModeImage" onclick="switchMode('image')" class="flex items-center space-x-2 px-6 py-2 rounded-full text-xs font-sans font-bold uppercase tracking-wider transition-all duration-300 btn-active">
+                    <i class="fa-solid fa-camera text-xs"></i>
+                    <span>Modo Imagen</span>
+                </button>
+                <button id="btnModeVideo" onclick="switchMode('video')" class="flex items-center space-x-2 px-6 py-2 rounded-full text-xs font-sans font-bold uppercase tracking-wider transition-all duration-300 text-[#25282B] hover:bg-[#25282B]/10">
+                    <i class="fa-solid fa-video text-xs"></i>
+                    <span>Modo Video</span>
+                </button>
+            </div>
+
+            <button onclick="resetAllFields()" title="Restablecer" class="px-5 py-2.5 rounded-full border border-[#25282B] hover:bg-[#25282B] hover:text-[#10cb00] text-xs font-sans font-bold uppercase tracking-wider flex items-center space-x-2 text-[#25282B] transition-all">
+                <i class="fa-solid fa-rotate-left text-xs"></i>
+                <span>Reiniciar</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 flex-grow w-full space-y-6">
+
+        <div class="p-6 sm:p-8 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center space-x-3">
+                    <label for="inputSubject" class="text-xl sm:text-2xl font-sans font-black uppercase tracking-wider text-[#25282B]">
+                        BASIC PROMPT
+                    </label>
+
+                    <!-- HISTORIAL DROPDOWN -->
+                    <div class="relative inline-block" id="historyWrapper">
+                        <button id="btnHistoryToggle" onclick="toggleHistoryDropdown(event)" class="px-4 py-2 rounded-full btn-outline text-xs font-sans font-bold uppercase tracking-wider flex items-center space-x-2 transition bg-[#10cb00]">
+                            <i class="fa-solid fa-clock-rotate-left text-xs"></i>
+                            <span>Historial</span>
+                            <i id="iconHistoryChevron" class="fa-solid fa-chevron-down text-[10px] ml-1 transition-transform"></i>
+                        </button>
+
+                        <div id="historyDropdown" class="hidden absolute top-full left-0 mt-2 w-72 sm:w-80 bg-[#10cb00] border-2 border-[#25282B] rounded-2xl z-50 max-h-72 overflow-y-auto p-2 space-y-1">
+                            <div class="px-3 py-2 border-b border-[#25282B]/20 text-[11px] font-bold text-[#25282B] uppercase tracking-wider flex justify-between items-center">
+                                <span>Prompts Anteriores</span>
+                                <button onclick="clearHistory(event)" class="text-[10px] text-red-900 hover:underline font-bold">Borrar todo</button>
+                            </div>
+                            <div id="historyItemsContainer" class="space-y-1"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <textarea id="inputSubject" rows="3" placeholder="Describe aquí tu idea básica en cualquier idioma (ej: Retrato de un ciborg samurái contemplativo bajo la lluvia...)" class="w-full bg-[#10cb00] border border-[#25282B] rounded-2xl p-4 text-xs font-sans font-medium text-[#25282B] placeholder:text-[#25282B]/60 focus:outline-none focus:ring-1 focus:ring-[#25282B] transition resize-none"></textarea>
+
+            <div class="pt-1 flex flex-wrap gap-2 items-center">
+                <div class="flex items-center space-x-2 mr-2 shrink-0">
+                    <span class="text-xs font-sans font-bold uppercase tracking-wider text-[#25282B]">
+                        <i class="fa-solid fa-plus-circle mr-1"></i>Sugerencias de estética:
+                    </span>
+                    <button type="button" onclick="shuffleAestheticTags()" title="Obtener nuevas sugerencias" class="px-3 py-1 rounded-full btn-active text-[11px] font-sans font-bold uppercase tracking-wider flex items-center space-x-1.5 transition-all">
+                        <i class="fa-solid fa-shuffle text-[10px]"></i>
+                        <span>Shuffle</span>
+                    </button>
+                </div>
+                <div id="aestheticTagsContainer" class="flex flex-wrap gap-2 items-center"></div>
+            </div>
+        </div>
+
+        <div class="p-6 sm:p-8 space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center space-x-2.5">
+                    <h2 class="text-xl sm:text-2xl font-sans font-black uppercase tracking-wider text-[#25282B]">PARÁMETROS VISUALES</h2>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <button id="btnSaveFavorite" onclick="openSaveFavoriteModal()" title="Guardar esta configuración" class="px-4 py-2 rounded-full btn-outline text-xs font-sans font-bold uppercase tracking-wider flex items-center space-x-1.5 transition-all bg-[#10cb00]">
+                        <i id="iconSaveFavorite" class="fa-regular fa-star text-xs"></i>
+                        <span>Guardar Favorito</span>
+                    </button>
+
+                    <div class="relative w-44" id="wrapperFavorites">
+                        <select id="selectFavorites" onchange="loadFavorite(this.value)" class="hidden">
+                            <option value="">Mis Favoritos (0)</option>
+                        </select>
+                    </div>
+
+                    <button id="btnUploadImage" onclick="triggerImageUpload()" title="Extraer parámetros visuales de una imagen" class="px-4 py-2 rounded-full btn-outline text-xs font-sans font-bold uppercase tracking-wider flex items-center space-x-1.5 transition-all bg-[#10cb00]">
+                        <i id="iconUploadImage" class="fa-solid fa-arrow-up-from-bracket text-xs"></i>
+                        <span id="btnUploadText">Upload</span>
+                    </button>
+                    <input type="file" id="uploadImageInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                <div class="flex flex-col space-y-2">
+                    <label class="block text-xs font-sans font-bold text-[#25282B] uppercase tracking-wider">
+                        <i class="fa-solid fa-film mr-1"></i> Tipología Estética
+                    </label>
+                    <div class="relative" id="wrapperStyle">
+                        <select id="selectStyle" class="hidden">
+                            <option value="">Ninguno / Por defecto</option>
+                            <option value="Street Photography in black and white, Daidō Moriyama style, high contrast grain">Fotografía Callejera B&N (Daidō Moriyama)</option>
+                            <option value="High-end Editorial Product Studio Photography, podium arrangement, commercial lighting">Bodegón Publicitario / Producto Studio</option>
+                            <option value="Architectural Photography, Apartamento Magazine style, warm ambient light, interior design">Fotografía de Arquitectura / Interiores</option>
+                            <option value="Haute Cuisine Gastronomic Photography, macro focus, subtle steam, Michelin aesthetic">Gastronómica / Alta Cocina</option>
+                            <option value="Cinematic Auteur Scene, Wes Anderson symmetry, pastel color palette, vintage frame">Cine de Autor (Wes Anderson)</option>
+                            <option value="High Fashion Editorial Photography, Vogue style, sharp contrast, dramatic posing">Editorial de Moda (Vogue Style)</option>
+                            <option value="Cyberpunk Sci-Fi Neo-noir, neon reflections, wet asphalt, dark mood">Cyberpunk / Sci-Fi Neo-noir</option>
+                            <option value="Vintage 1970s Kodachrome Film Aesthetic, warm nostalgia, analog grain">Analógico 1970s Kodachrome</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex flex-col space-y-2">
+                    <label class="block text-xs font-sans font-bold text-[#25282B] uppercase tracking-wider">
+                        <i class="fa-solid fa-crop-simple mr-1"></i> Encuadre y Plano
+                    </label>
+                    <div class="relative" id="wrapperFraming">
+                        <select id="selectFraming" class="hidden">
+                            <option value="">Ninguno / Por defecto</option>
+                            <option value="Extreme Close-up macro detail shot, focusing on texture and eyes">Plano Detalle / Extreme Close-up</option>
+                            <option value="Tight Portrait Close-Up shot, focusing on emotion and facial depth">Plano Corto / Portrait Close-Up</option>
+                            <option value="Medium Shot framing from waist up, natural human interaction space">Plano Medio / Medium Shot</option>
+                            <option value="Full-body shot displaying outfit, character stance, and environment">Plano Entero / Full Body</option>
+                            <option value="Cinematic Wide Shot establishing environment and subject in context">Plano General / Wide Shot</option>
+                            <option value="Overhead Top-Down Flatlay composition from directly above">Vista Cenital / Overhead Flatlay</option>
+                            <option value="Dramatic Low Angle shot looking upward for power and grandeur">Ángulo Contrapicado / Low Angle</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex flex-col space-y-2">
+                    <label class="block text-xs font-sans font-bold text-[#25282B] uppercase tracking-wider">
+                        <i class="fa-solid fa-camera-retro mr-1"></i> Óptica y Cámara
+                    </label>
+                    <div class="relative" id="wrapperCamera">
+                        <select id="selectCamera" class="hidden">
+                            <option value="">Ninguna / Por defecto</option>
+                            <option value="shot on 85mm f/1.4 prime lens, sharp subject separation, creamy bokeh">85mm f/1.4 (Retrato / Bokeh suave)</option>
+                            <option value="shot on 50mm f/1.8 classic lens, natural human eye perspective">50mm f/1.8 (Perspectiva Humana)</option>
+                            <option value="shot on 35mm street lens, documentary feel, subtle context depth">35mm (Documental / Callejera)</option>
+                            <option value="shot on 18mm wide-angle lens, immersive perspective, deep depth of field">18mm Gran Angular (Perspectiva Amplia)</option>
+                            <option value="shot on ARRI Alexa Mini cinema camera with Panavision Anamorphic lenses">ARRI Alexa Mini + Panavisión Anamórfica</option>
+                            <option value="shot on Hasselblad 500C/M medium format camera, incredible detail">Hasselblad 500C/M Formato Medio</option>
+                            <option value="shot on Kodak Portra 400 35mm film stock, soft skin tones, fine film grain">Kodak Portra 400 (Película Analógica)</option>
+                            <option value="shot on ILFORD HP5 Plus black and white film stock, deep contrast">ILFORD HP5 B&N (Blanco y Negro Clásico)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex flex-col space-y-2">
+                    <label class="block text-xs font-sans font-bold text-[#25282B] uppercase tracking-wider">
+                        <i class="fa-solid fa-lightbulb mr-1"></i> Iluminación
+                    </label>
+                    <div class="relative" id="wrapperLighting">
+                        <select id="selectLighting" class="hidden">
+                            <option value="">Ninguna / Por defecto</option>
+                            <option value="Soft natural window side-lighting, subtle shadows, organic glow">Luz de Ventana Lateral Difusa</option>
+                            <option value="Rembrandt chiaroscuro lighting, subtle triangle highlight on cheek, low-key mood">Rembrandt / Chiaroscuro (Low Key)</option>
+                            <option value="High-Key bright commercial studio lighting, minimal shadows, crisp detail">High Key / Estudio Comercial</option>
+                            <option value="Golden Hour sunset sunlight, warm long shadows, lens flare glow">Golden Hour (Atardecer Cálido)</option>
+                            <option value="Blue Hour twilight ambiance, cool atmosphere, soft ambient light">Blue Hour (Hora Azul Nocturna)</option>
+                            <option value="Cinematic Rim Backlighting with glowing outline halo on subject">Luz de Contorno / Rim Light</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex flex-col space-y-2">
+                    <label class="block text-xs font-sans font-bold text-[#25282B] uppercase tracking-wider">
+                        <i class="fa-solid fa-border-all mr-1"></i> Composición
+                    </label>
+                    <div class="relative" id="wrapperComposition">
+                        <select id="selectComposition" class="hidden">
+                            <option value="">Ninguna / Por defecto</option>
+                            <option value="Rule of thirds composition, off-center focal point, balanced harmony">Regla de los Tercios</option>
+                            <option value="Central symmetry composition, perfect balance, powerful focal point">Simetría Central</option>
+                            <option value="Leading lines directing eyes to subject, strong visual path">Líneas de Guía / Leading Lines</option>
+                            <option value="Negative space dominant composition, clean minimalist aesthetic">Espacio Negativo Minimalista</option>
+                            <option value="Dynamic diagonal framing, sense of motion and action depth">Composición Diagonal Dinámica</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex flex-col space-y-2">
+                    <label class="block text-xs font-sans font-bold text-[#25282B] uppercase tracking-wider">
+                        <i class="fa-solid fa-expand mr-1"></i> Relación de Aspecto
+                    </label>
+                    <div class="relative" id="wrapperAspectRatio">
+                        <select id="selectAspectRatio" class="hidden">
+                            <option value="">Ninguna / Por defecto</option>
+                            <option value="16:9 cinematic widescreen composition">16:9 Cinema Widescreen</option>
+                            <option value="9:16 vertical smartphone reel framing">9:16 Vertical Reel / Story</option>
+                            <option value="4:5 portrait social media framing">4:5 Portrait Social Media</option>
+                            <option value="1:1 classic square format framing">1:1 Square Classic</option>
+                            <option value="2:1 anamorphic theatrical aspect ratio">2:1 Anamorphic Cinema</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="videoControlsContainer" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-5 pt-4 border-t border-[#25282B]/20">
+                <div class="flex flex-col space-y-2">
+                    <label class="block text-xs font-sans font-bold text-[#25282B] uppercase tracking-wider">
+                        <i class="fa-solid fa-video mr-1"></i> Movimiento de Cámara
+                    </label>
+                    <div class="relative" id="wrapperCameraMovement">
+                        <select id="selectCameraMovement" class="hidden">
+                            <option value="">Ninguno / Estático</option>
+                            <option value="Slow steady push-in dolly camera movement towards the subject">Slow Dolly Push-in</option>
+                            <option value="Dynamic orbiting camera movement around the main subject">Orbiting Camera</option>
+                            <option value="Handheld camera tracking shot following character movement">Handheld Tracking Shot</option>
+                            <option value="Rising crane shot revealing scale of environment">Rising Crane Shot</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex flex-col space-y-2">
+                    <label class="block text-xs font-sans font-bold text-[#25282B] uppercase tracking-wider">
+                        <i class="fa-solid fa-stopwatch mr-1"></i> Ritmo y Cadencia
+                    </label>
+                    <div class="relative" id="wrapperVideoPacing">
+                        <select id="selectVideoPacing" class="hidden">
+                            <option value="">Ninguno / Estándar</option>
+                            <option value="Slow-motion 120fps fluid cinematic cadence">Slow Motion (120fps)</option>
+                            <option value="Real-time 24fps filmic movement cadence">24fps Real-time Filmic</option>
+                            <option value="High-speed dynamic fast-cutting cadence">Fast Pace / Dynamic Action</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 sm:p-8 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl sm:text-2xl font-sans font-black uppercase tracking-wider text-[#25282B]">TENDENCIAS DE DISEÑO 2026</h3>
+                <span class="text-[10px] font-sans font-bold uppercase tracking-wider text-[#25282B] border border-[#25282B] px-3 py-1 rounded-full">Presets</span>
+            </div>
+
+            <p class="text-xs font-sans text-[#25282B]">
+                Selecciona una tendencia del reporte de diseño 2026 para previsualizar y aplicar sus especificaciones técnicas:
+            </p>
+
+            <div id="trendsContainer" class="flex flex-wrap gap-2 pt-1"></div>
+
+            <!-- Trend Preview Card -->
+            <div id="trendInfoCard" class="hidden border border-[#25282B] p-5 rounded-2xl space-y-3 transition-all bg-[#10cb00]">
+                <div class="flex items-center justify-between">
+                    <h4 id="trendCardTitle" class="text-sm font-sans font-black uppercase tracking-wider text-[#25282B]"></h4>
+                    <button type="button" id="btnTrendAction" class="text-[10px] font-sans font-bold uppercase tracking-wider transition-all">
+                        <!-- Content injected via JS based on state -->
+                    </button>
+                </div>
+                <p id="trendCardDesc" class="text-xs font-sans text-[#25282B] leading-relaxed font-medium"></p>
+                
+                <div class="pt-2 border-t border-[#25282B]/20 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <span class="text-[10px] font-sans text-[#25282B] font-black uppercase">Tokens Generativos:</span>
+                        <p id="trendCardSpecs" class="text-[11px] font-sans text-[#25282B] mt-1 opacity-90"></p>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-sans text-red-900 font-black uppercase">Elementos a Evitar (Negativos):</span>
+                        <p id="trendCardNegatives" class="text-[11px] font-sans text-red-900 mt-1 opacity-90"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-2 pb-2 flex justify-center">
+            <button id="btnBoostPrompt" onclick="executeBoostPrompt()" class="w-full sm:w-auto px-16 py-4 rounded-full btn-active text-xs font-sans font-black uppercase tracking-widest flex items-center justify-center space-x-3 transform transition active:scale-95 shadow-[4px_4px_0px_0px_rgba(37,40,43,1)] hover:translate-y-1 hover:shadow-none">
+                <i id="btnBoostIcon" class="fa-solid fa-bolt text-sm"></i>
+                <span id="btnBoostText">BOOST PROMPT</span>
+            </button>
+        </div>
+
+        <div id="outputSection" class="p-6 sm:p-8 space-y-6 transition-all duration-500">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#25282B]/20 pb-4">
+                <div class="flex items-center space-x-3">
+                    <span class="w-8 h-8 rounded-full border border-[#25282B] flex items-center justify-center text-[#25282B] text-sm bg-[#10cb00]">
+                        <i class="fa-solid fa-arrow-up"></i>
+                    </span>
+                    <h2 class="text-xl sm:text-2xl font-sans font-black uppercase tracking-wider text-[#25282B]">PROMPT BOOSTED</h2>
+                    
+                    <div class="border border-[#25282B] p-1 rounded-full flex items-center shrink-0">
+                        <button id="tabNanoBanana" onclick="switchPlatformTab('nanoBanana')" class="px-4 py-1.5 rounded-full text-xs font-sans font-bold uppercase tracking-wider transition-all btn-active">
+                            <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Nano Banana / Visual
+                        </button>
+                        <button id="tabChatGPT" onclick="switchPlatformTab('chatGPT')" class="px-4 py-1.5 rounded-full text-xs font-sans font-bold uppercase tracking-wider transition-all text-[#25282B] hover:bg-[#25282B]/10">
+                            <i class="fa-solid fa-robot mr-1"></i> ChatGPT / LLM
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="copyMasterPrompt()" class="px-4 py-2 rounded-full btn-outline text-xs font-sans font-bold uppercase tracking-wider flex items-center space-x-1.5 bg-[#10cb00]">
+                        <i class="fa-regular fa-copy text-xs"></i>
+                        <span>Copiar</span>
+                    </button>
+
+                    <button onclick="generateAlternativeVariation()" class="px-4 py-2 rounded-full btn-outline text-xs font-sans font-bold uppercase tracking-wider flex items-center space-x-1.5 bg-[#10cb00]" title="Generar una variación alternativa">
+                        <i class="fa-solid fa-shuffle text-xs"></i>
+                        <span>Otras Sugerencias</span>
+                    </button>
+
+                    <button id="btnToggleSequence" onclick="toggleNarrativeSequence()" class="px-4 py-2 rounded-full btn-outline text-xs font-sans font-bold uppercase tracking-wider flex items-center space-x-1.5 bg-[#10cb00]">
+                        <i class="fa-solid fa-film text-xs"></i>
+                        <span>Estructura en 3 Pasos</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-transparent border border-[#25282B] p-6 rounded-2xl font-sans text-xs font-medium text-[#25282B] leading-relaxed select-all min-h-[90px] cursor-pointer transition duration-200 hover:bg-[#25282B]/5" id="outputMasterPrompt" onclick="copyMasterPrompt()" title="Haz clic en el texto para copiarlo al portapapeles">
+                Haz clic en "BOOST PROMPT" para que la IA traduzca y estructure tu idea en un prompt profesional en inglés...
+            </div>
+
+            <div id="toastNotification" class="hidden p-3.5 bg-[#25282B] text-[#10cb00] rounded-full text-xs font-sans text-center font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center space-x-2 border border-[#25282B]">
+                <i class="fa-solid fa-check-circle"></i>
+                <span id="toastMessage">Prompt generado y copiado con éxito</span>
+            </div>
+
+            <div id="adjustPromptSection" class="hidden pt-4 border-t border-[#25282B]/20 space-y-3 transition-all duration-500">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-sliders text-[#25282B]"></i>
+                    <h3 class="text-xs font-sans font-bold text-[#25282B] uppercase tracking-wider">ADJUST PROMPT</h3>
+                </div>
+                <p class="text-xs font-sans text-[#25282B]">Pide un ajuste o variación específica a la IA para afinar el prompt (ej: "Añade niebla densa y haz que sea de noche").</p>
+                
+                <div class="flex flex-col sm:flex-row items-center gap-3">
+                    <input type="text" id="inputAdjustPrompt" placeholder="Escribe tu ajuste aquí..." class="w-full bg-[#10cb00] border border-[#25282B] rounded-2xl p-4 text-xs font-sans font-medium text-[#25282B] placeholder:text-[#25282B]/60 focus:outline-none focus:ring-1 focus:ring-[#25282B]">
+                    <button onclick="applyPromptAdjustment()" class="w-full sm:w-auto px-8 py-4 rounded-full btn-active text-xs font-sans font-bold uppercase tracking-wider shrink-0 flex items-center justify-center space-x-2 transition">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                        <span>Adjust</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="narrativeSequenceContainer" class="hidden pt-4 border-t border-[#25282B]/20 space-y-4 transition-all duration-500">
+                <div class="flex items-center justify-between pb-1">
+                    <div>
+                        <h3 class="text-xs font-sans font-black text-[#25282B] uppercase tracking-wider">ESTRUCTURA EN 3 PASOS</h3>
+                        <p class="text-[11px] font-sans text-[#25282B]">Ideal para generar escenas de video continuas en Luma, Runway o Sora</p>
+                    </div>
+                    <span class="text-[10px] font-sans font-bold text-[#25282B] uppercase tracking-wider border border-[#25282B] px-3 py-1 rounded-full">3-Step Arc</span>
+                </div>
+
+                <div class="bg-transparent p-5 rounded-2xl border border-[#25282B] space-y-2 relative">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-sans font-bold text-[#25282B] uppercase tracking-wider">Paso 1 • Establecimiento (Wide Shot)</span>
+                        <button onclick="copyShotPrompt('shot1Text')" class="px-3 py-1 rounded-full btn-outline text-[10px] font-sans font-bold uppercase tracking-wider bg-[#10cb00]"><i class="fa-regular fa-copy"></i> Copiar</button>
+                    </div>
+                    <p id="shot1Text" class="text-[11px] font-sans font-medium text-[#25282B] leading-normal"></p>
+                </div>
+
+                <div class="bg-transparent p-5 rounded-2xl border border-[#25282B] space-y-2 relative">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-sans font-bold text-[#25282B] uppercase tracking-wider">Paso 2 • Acción Principal (Medium Shot)</span>
+                        <button onclick="copyShotPrompt('shot2Text')" class="px-3 py-1 rounded-full btn-outline text-[10px] font-sans font-bold uppercase tracking-wider bg-[#10cb00]"><i class="fa-regular fa-copy"></i> Copiar</button>
+                    </div>
+                    <p id="shot2Text" class="text-[11px] font-sans font-medium text-[#25282B] leading-normal"></p>
+                </div>
+
+                <div class="bg-transparent p-5 rounded-2xl border border-[#25282B] space-y-2 relative">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-sans font-bold text-[#25282B] uppercase tracking-wider">Paso 3 • Plano Detalle Clave (Close-Up)</span>
+                        <button onclick="copyShotPrompt('shot3Text')" class="px-3 py-1 rounded-full btn-outline text-[10px] font-sans font-bold uppercase tracking-wider bg-[#10cb00]"><i class="fa-regular fa-copy"></i> Copiar</button>
+                    </div>
+                    <p id="shot3Text" class="text-[11px] font-sans font-medium text-[#25282B] leading-normal"></p>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <div id="modalSaveFavorite" class="hidden fixed inset-0 bg-[#25282B]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-[#10cb00] border-2 border-[#25282B] p-6 rounded-3xl max-w-md w-full space-y-4">
+            <h3 class="text-xl font-sans font-black uppercase text-[#25282B]">Guardar en Favoritos</h3>
+            <p class="text-xs font-sans text-[#25282B]">Asigna un nombre para recordar este ajuste técnico de parámetros:</p>
+            <input type="text" id="favoriteNameInput" placeholder="Ej: Retrato Cyberpunk 85mm" class="w-full bg-[#10cb00] border border-[#25282B] rounded-2xl p-3 text-xs font-sans text-[#25282B] placeholder:text-[#25282B]/60 focus:outline-none focus:ring-1 focus:ring-[#25282B]">
+            <div class="flex justify-end space-x-3 pt-2">
+                <button onclick="closeSaveFavoriteModal()" class="px-5 py-2 rounded-full btn-outline text-xs font-sans font-bold uppercase bg-[#10cb00]">Cancelar</button>
+                <button onclick="confirmSaveFavorite()" class="px-5 py-2 rounded-full btn-active text-xs font-sans font-bold uppercase">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalCustomParam" class="hidden fixed inset-0 bg-[#25282B]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-[#10cb00] border-2 border-[#25282B] p-6 rounded-3xl max-w-md w-full space-y-4">
+            <h3 class="text-xl font-sans font-black uppercase text-[#25282B]">Agregar Opción Personalizada</h3>
+            <p class="text-xs font-sans text-[#25282B]">Escribe tu propio parámetro técnico o estética para este selector:</p>
+            <input type="text" id="inputCustomParamValue" placeholder="Ej: Vintage Super 8mm film, aperture f/0.95..." class="w-full bg-[#10cb00] border border-[#25282B] rounded-2xl p-3 text-xs font-sans text-[#25282B] placeholder:text-[#25282B]/60 focus:outline-none focus:ring-1 focus:ring-[#25282B]">
+            <div class="flex justify-end space-x-3 pt-2">
+                <button onclick="closeCustomParamModal()" class="px-5 py-2 rounded-full btn-outline text-xs font-sans font-bold uppercase bg-[#10cb00]">Cancelar</button>
+                <button onclick="confirmCustomParam()" class="px-5 py-2 rounded-full btn-active text-xs font-sans font-bold uppercase">Agregar</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 text-center text-xs font-sans font-bold uppercase tracking-widest text-[#25282B] pb-6">
+        <p>Prompt Booster Studio by Matiwin</p>
+    </footer>
+
+    <script>
+        let currentMode = 'image';
+        let currentPlatformTab = 'nanoBanana';
+        let variationIndex = 0;
+        let activeCustomSelectId = null;
+        let selectedTrendId = null; // The actual applied trend
+        let previewTrendId = null; // The trend currently being viewed in the card
+
+        let generatedPrompts = { nanoBanana: '', chatGPT: '' };
+        let sequencePrompts = { shot1: '', shot2: '', shot3: '' };
+        let historyList = [];
+
+        const aestheticPool = [
+            { label: "Noir / B&N", text: "film noir style, intense chiaroscuro contrast, dramatic shadows, moody 35mm monochrome" },
+            { label: "Kodachrome 70s", text: "vintage 1970s Kodachrome film aesthetic, warm nostalgia, analog texture, soft grain" },
+            { label: "Cyberpunk Neon", text: "cyberpunk neo-noir aesthetic, neon-lit night, rainy reflections on wet pavement" },
+            { label: "Vogue Fashion", text: "high fashion editorial photography, sleek Vogue styling, dramatic studio lighting" },
+            { label: "Wes Anderson", text: "auteur cinematic style, symmetrical composition, pastel color palette, whimsical vintage frame" },
+            { label: "Minimalist Studio", text: "clean minimalist studio product setup, elegant directional lighting, soft subtle shadows" },
+            { label: "Gastronomic Michelin", text: "haute cuisine food photography, close-up macro, appetizing ambient steam, soft warm highlights" },
+            { label: "Architectural Interior", text: "architectural interior design photography, Apartamento magazine style, wide natural lighting" }
+        ];
+
+        const variationModifiers = [
+            "enhanced with volumetric fog and atmospheric rim lighting",
+            "rendered with warm golden hour sunlight and organic lens flare highlights",
+            "framed with dramatic high-contrast chiaroscuro shadows and desaturated color grading",
+            "softened with high-key studio diffusion and gentle pastel tonal balance"
+        ];
+
+        const selectIds = [
+            'selectFavorites', 'selectStyle', 'selectFraming', 'selectCamera',
+            'selectLighting', 'selectComposition', 'selectAspectRatio',
+            'selectCameraMovement', 'selectVideoPacing'
+        ];
+
+        const trends2026Data = [
+            {
+                id: "direct_flash",
+                name: "1. Direct Flash",
+                category: "Fotografía",
+                desc: "Estética cruda y directa con flash frontal, sombras marcadas, colores intensos y espíritu callejero real.",
+                keywords: "direct on-camera flash, harsh single-point light, intense shadow falloff, editorial snapshot, raw flash photography, slow shutter drag blur, lived-in aesthetic, 35mm point-and-shoot",
+                negative: "Softbox studio lighting, diffused light, perfect rim lighting, airbrushed skin, pristine environment",
+                params: { selectLighting: "Direct on-camera flash, harsh single-point light", selectCamera: "35mm point-and-shoot, raw flash photography" }
+            },
+            {
+                id: "maximalism",
+                name: "2. Maximalismo",
+                category: "Fotografía",
+                desc: "Explosión de color, densidad de elementos y composiciones recargadas que desafían el minimalismo.",
+                keywords: "maximalist composition, vibrant color explosion, dense visual clutter, eclectic arrangement, rich detailed layers, intense chromatic palette, saturated visual abundance",
+                negative: "Minimalist negative space, monochrome, muted pastel tones, isolated single subjects, empty backgrounds",
+                params: { selectComposition: "Maximalist dense composition, rich detailed layers", selectStyle: "Vibrant color explosion, high visual density" }
+            },
+            {
+                id: "sensory_storytelling",
+                name: "3. Sensory Storytelling",
+                category: "Fotografía",
+                desc: "Fotografía de alta sensibilidad táctil centrada en texturas, temperaturas y sensaciones físicas.",
+                keywords: "tactile material texture, sensory macro photography, evocative ambient light, soft focus depth of field, tangible surface feeling, subtle atmospheric glow, intimate physical detail",
+                negative: "Flat lighting, distant wide shots, clinical environments, hard digital sharpening, untextured synthetic surfaces",
+                params: { selectFraming: "Extreme Close-up macro detail shot, focusing on texture and eyes", selectLighting: "Soft natural window side-lighting, subtle shadows, organic glow" }
+            },
+            {
+                id: "distorted_wide_angle",
+                name: "4. Distorted Wide Angle",
+                category: "Fotografía",
+                desc: "Encuadres hiperdinámicos con ojo de pez y angulares deformados que te meten directo en la acción.",
+                keywords: "fisheye lens distortion, ultra-wide angle perspective, extreme foreshortening, warped perspective framing, dynamic close-up wide shot, 90s skate video lens distortion",
+                negative: "Telephoto compression, flat orthographic angles, architectural correction, subtle standard focal lengths",
+                params: { selectCamera: "Fisheye lens distortion, ultra-wide angle perspective", selectFraming: "Dynamic close-up wide shot with warped perspective" }
+            },
+            {
+                id: "grunge",
+                name: "5. Grunge",
+                category: "Fotografía",
+                desc: "Realismo puro sin retoques: grano, texturas desgastadas, estética urbana y caos auténtico.",
+                keywords: "gritty film grain, raw unpolished reality, analog noise and dust, textured grunge aesthetic, honest imperfection, authentic street-level realism, tactile wear and tear",
+                negative: "Smooth airbrushing, clean studio background, pristine CGI rendering, glossy polish, clinical lighting",
+                params: { selectCamera: "Analog film camera, gritty film grain and dust", selectStyle: "Raw unpolished street-level realism" }
+            },
+            {
+                id: "surrealism",
+                name: "6. Surrealismo",
+                category: "Fotografía",
+                desc: "Escenas de ensueño e imposibles que rompen la lógica con acabado hiperrealista y conceptual.",
+                keywords: "surreal conceptual art photography, uncanny visual juxtaposition, dreamlike high-concept scene, impossible physical reality, photorealistic surrealism, symbolic art direction",
+                negative: "Generic sci-fi tropes, low-effort AI glitches, abstract blur without structure, cartoonish rendering",
+                params: { selectComposition: "Central symmetry composition, perfect balance, powerful focal point", selectStyle: "Surreal conceptual art, uncanny visual juxtaposition" }
+            },
+            {
+                id: "americana",
+                name: "7. Americana",
+                category: "Fotografía",
+                desc: "Historia, carácter y texturas del espíritu americano rural y western con narrativa honesta.",
+                keywords: "authentic americana photography, raw western landscape, cinematic rural narrative, weathered rustic texture, quiet resilience story, dusk lighting over vast plains, honest portraiture",
+                negative: "Sleek urban architecture, neon lights, modern digital aesthetics, sterile studio setups",
+                params: { selectLighting: "Golden Hour sunset sunlight, warm long shadows, lens flare glow", selectCamera: "Kodak Portra 400 35mm film stock, soft skin tones, fine film grain" }
+            },
+            {
+                id: "scrapbook_scanner",
+                name: "8. Scrapbook / Scanner",
+                category: "Diseño Mixto",
+                desc: "Estética analógica de collage, recortes de papel a mano, texturas de escáner y capas superpuestas.",
+                keywords: "scanner bed drag distortion, physically cut paper collage, ripped paper edges, tactile mixed media layout, analog printer artifacts, layered physical cutouts",
+                negative: "Clean vector masks, seamless digital blending, flat digital graphics, perfect geometric alignment",
+                params: { selectStyle: "Scrapbook handmade collage, scanner artifacts", selectComposition: "Layered physical cutouts and ripped paper" }
+            },
+            {
+                id: "cyber_goth",
+                name: "9. Cyber Goth",
+                category: "Diseño Mixto",
+                desc: "Futurismo oscuro con cromo líquido, grafismos espinosos, estética underground y actitud rebelde.",
+                keywords: "cyber goth dark aesthetic, liquid chrome metal reflections, sharp tribal spikes, futuristic underground vibe, dark moody contrast, gritty digital noise",
+                negative: "Light pastel themes, corporate corporate vector graphics, warm earthy palettes, soft friendly UI",
+                params: { selectStyle: "Cyberpunk Sci-Fi Neo-noir, neon reflections, wet asphalt, dark mood", selectLighting: "High-contrast neon-on-dark, moody contrast" }
+            },
+            {
+                id: "future_medieval",
+                name: "10. Future Medieval",
+                category: "Diseño Mixto",
+                desc: "Fusión de simbolismo medieval, tipografías góticas y detalles ornamentales bajo un prisma digital oscuro.",
+                keywords: "future medieval aesthetic, ornate blackletter embellishments, archaic dark symbolism, symmetrical heraldic framing, mythical dark fantasy detail",
+                negative: "Modern minimalist vectors, bright cheerful corporate style, futuristic neon sci-fi",
+                params: { selectComposition: "Symmetrical heraldic framing, ornate borders", selectStyle: "Future medieval dark fantasy" }
+            },
+            {
+                id: "skate_surf",
+                name: "11. Skate / Surf Shop",
+                category: "Diseño Mixto",
+                desc: "Estética zine DIY y rebelde: serigrafía, efectos halftone, recortes caóticos y actitud anti-grilla.",
+                keywords: "diy punk zine aesthetic, halftone newsprint print effect, chaotic poster collage, bold rebellious graphics, spray paint and tape overlay, skate shop flyer style",
+                negative: "Rigid grid alignment, subtle corporate typography, clean white space, polished vector illustrations",
+                params: { selectStyle: "DIY punk zine halftone newsprint", selectComposition: "Chaotic anti-grid poster collage" }
+            },
+            {
+                id: "scribbles",
+                name: "12. Scribbles Art",
+                category: "Diseño Mixto",
+                desc: "Fotografía intervenida a mano con pintura, garabatos expresivos y trazos analógicos sobre la imagen.",
+                keywords: "hand-painted scribbles on photo, grease pencil overlay art, mixed media photographic paint strokes, raw expressive doodles, tactile artist hand details",
+                negative: "Perfect digital vector brush strokes, uniform computer lines, untextured photographs",
+                params: { selectStyle: "Mixed media with hand-painted scribbles and grease pencil", selectFraming: "Medium Shot framing from waist up, natural human interaction space" }
+            },
+            {
+                id: "index_catalog",
+                name: "13. Index / Catalog",
+                category: "Diseño Mixto",
+                desc: "Orden visual y curaduría: objetos recortados y catalogados con precisión sobre fondos sólidos.",
+                keywords: "curated index catalog layout, isolated object collage on solid backdrop, organized structural grid layout, clean inventory photography, tactile product breakdown",
+                negative: "Chaotic overlapping without boundaries, dark cluttered backgrounds, unorganized random placement",
+                params: { selectComposition: "Organized structural grid catalog layout", selectLighting: "High-Key bright commercial studio lighting, minimal shadows, crisp detail" }
+            }
+        ];
+
+        window.onload = function() {
+            shuffleAestheticTags();
+            loadStoredFavorites();
+            loadHistory();
+            render2026Trends();
+            buildCustomDropdowns();
+            setupDragAndDrop();
+
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.custom-select-wrapper') && !e.target.closest('#historyWrapper')) {
+                    closeAllDropdowns();
+                }
+            });
+        };
+
+        function loadHistory() {
+            try {
+                historyList = JSON.parse(localStorage.getItem('prompt_booster_history') || '[]');
+            } catch (e) {
+                historyList = [];
+            }
+            renderHistoryDropdown();
+        }
+
+        function saveToHistory(entry) {
+            historyList.unshift(entry);
+            if (historyList.length > 15) historyList.pop();
+            localStorage.setItem('prompt_booster_history', JSON.stringify(historyList));
+            renderHistoryDropdown();
+        }
+
+        function renderHistoryDropdown() {
+            const container = document.getElementById('historyItemsContainer');
+            if (!container) return;
+
+            if (historyList.length === 0) {
+                container.innerHTML = `<div class="p-3 text-center text-xs text-[#25282B]/60 italic">No hay historial aún.</div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            historyList.forEach(item => {
+                const btn = document.createElement('div');
+                btn.className = 'px-3 py-2 rounded-xl text-xs hover:bg-[#25282B]/10 cursor-pointer transition flex flex-col space-y-0.5 text-[#25282B]';
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    restoreHistoryItem(item.id);
+                };
+
+                const dateStr = new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                btn.innerHTML = `
+                    <div class="flex items-center justify-between font-bold">
+                        <span class="truncate pr-2">${item.title}</span>
+                        <span class="text-[10px] uppercase shrink-0">${item.mode === 'video' ? 'Video' : 'Imagen'} • ${dateStr}</span>
+                    </div>
+                    <p class="text-[10px] truncate">${item.subject}</p>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        function toggleHistoryDropdown(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('historyDropdown');
+            const icon = document.getElementById('iconHistoryChevron');
+            if (!dropdown) return;
+
+            const isHidden = dropdown.classList.contains('hidden');
+            closeAllDropdowns();
+
+            if (isHidden) {
+                dropdown.classList.remove('hidden');
+                if (icon) icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        function clearHistory(e) {
+            if (e) e.stopPropagation();
+            historyList = [];
+            localStorage.removeItem('prompt_booster_history');
+            renderHistoryDropdown();
+            showToast("Historial borrado");
+        }
+
+        function restoreHistoryItem(id) {
+            const item = historyList.find(h => h.id === id);
+            if (!item) return;
+
+            document.getElementById('inputSubject').value = item.subject || '';
+            switchMode(item.mode || 'image');
+
+            if (item.style !== undefined) document.getElementById('selectStyle').value = item.style;
+            if (item.framing !== undefined) document.getElementById('selectFraming').value = item.framing;
+            if (item.camera !== undefined) document.getElementById('selectCamera').value = item.camera;
+            if (item.lighting !== undefined) document.getElementById('selectLighting').value = item.lighting;
+            if (item.composition !== undefined) document.getElementById('selectComposition').value = item.composition;
+            if (item.aspectRatio !== undefined) document.getElementById('selectAspectRatio').value = item.aspectRatio;
+
+            if (item.selectedTrendId) {
+                // Instantly apply it upon restore
+                apply2026Trend(item.selectedTrendId);
+            } else {
+                clearSelectedTrend();
+            }
+
+            buildCustomDropdowns();
+
+            if (item.generatedPrompts) {
+                generatedPrompts = { ...item.generatedPrompts };
+                document.getElementById('outputMasterPrompt').innerText = generatedPrompts[currentPlatformTab] || '';
+                document.getElementById('adjustPromptSection').classList.remove('hidden');
+            }
+            if (item.sequencePrompts) {
+                sequencePrompts = { ...item.sequencePrompts };
+                document.getElementById('shot1Text').innerText = sequencePrompts.shot1 || '';
+                document.getElementById('shot2Text').innerText = sequencePrompts.shot2 || '';
+                document.getElementById('shot3Text').innerText = sequencePrompts.shot3 || '';
+            }
+
+            closeAllDropdowns();
+            showToast("Prompt del historial cargado");
+        }
+
+        function render2026Trends() {
+            const container = document.getElementById('trendsContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            trends2026Data.forEach(trend => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.id = `btnTrend_${trend.id}`;
+                // Now clicking the button PREVIEWS the trend, rather than instantly selecting it.
+                btn.onclick = () => preview2026Trend(trend.id);
+                btn.className = 'px-3 py-1.5 rounded-full text-xs btn-outline font-sans font-bold uppercase tracking-wider transition';
+                btn.innerText = trend.name;
+                container.appendChild(btn);
+            });
+        }
+
+        function preview2026Trend(trendId) {
+            previewTrendId = trendId;
+            const trend = trends2026Data.find(t => t.id === trendId);
+            if (!trend) return;
+
+            const infoCard = document.getElementById('trendInfoCard');
+            const cardTitle = document.getElementById('trendCardTitle');
+            const cardDesc = document.getElementById('trendCardDesc');
+            const cardSpecs = document.getElementById('trendCardSpecs');
+            const cardNegatives = document.getElementById('trendCardNegatives');
+            const actionBtn = document.getElementById('btnTrendAction');
+
+            if (infoCard && cardTitle && cardDesc && cardSpecs && cardNegatives && actionBtn) {
+                cardTitle.innerText = `${trend.name} (${trend.category})`;
+                cardDesc.innerText = trend.desc;
+                cardSpecs.innerText = trend.keywords;
+                cardNegatives.innerText = trend.negative;
+
+                // Configure button based on whether this previewed trend is CURRENTLY active
+                if (selectedTrendId === trendId) {
+                    // It is active -> show DEACTIVATE
+                    actionBtn.innerHTML = '<i class="fa-solid fa-xmark mr-1"></i> Desactivar Preset';
+                    actionBtn.onclick = clearSelectedTrend;
+                    actionBtn.className = "text-[10px] font-sans font-bold uppercase tracking-wider text-[#25282B] hover:underline px-3 py-1.5 border border-[#25282B] rounded-full transition-all";
+                } else {
+                    // It is NOT active -> show SELECT/APPLY
+                    actionBtn.innerHTML = '<i class="fa-solid fa-check mr-1"></i> Seleccionar Preset';
+                    actionBtn.onclick = () => apply2026Trend(trendId);
+                    actionBtn.className = "text-[10px] font-sans font-bold uppercase tracking-wider text-[#10cb00] bg-[#25282B] hover:bg-[#25282B]/80 px-4 py-1.5 rounded-full shadow-md transition-all";
+                }
+
+                infoCard.classList.remove('hidden');
+            }
+        }
+
+        function apply2026Trend(trendId) {
+            selectedTrendId = trendId;
+
+            document.querySelectorAll('#trendsContainer button').forEach(b => {
+                b.classList.remove('active-trend');
+            });
+            const activeBtn = document.getElementById(`btnTrend_${trendId}`);
+            if (activeBtn) activeBtn.classList.add('active-trend');
+
+            // Set specific visual parameters based on the trend
+            const trend = trends2026Data.find(t => t.id === trendId);
+            if (trend && trend.params) {
+                Object.keys(trend.params).forEach(selectId => {
+                    setSelectValueOrCustom(selectId, trend.params[selectId]);
+                });
+                buildCustomDropdowns(); // Actualizar interfaz de los selectores
+            }
+
+            preview2026Trend(trendId);
+            showToast("Preset activado y parámetros actualizados");
+        }
+
+        function setSelectValueOrCustom(selectId, value) {
+            const selectEl = document.getElementById(selectId);
+            if (!selectEl) return;
+
+            let exists = false;
+            for (let i = 0; i < selectEl.options.length; i++) {
+                if (selectEl.options[i].value === value) {
+                    selectEl.selectedIndex = i;
+                    exists = true;
+                    break;
+                }
+            }
+
+            // Si el valor no existe en las opciones predeterminadas, agregarlo como personalizado
+            if (!exists) {
+                const newOpt = document.createElement('option');
+                newOpt.value = value;
+                newOpt.text = `[Preset] ${value}`;
+                newOpt.selected = true;
+                selectEl.appendChild(newOpt);
+            }
+        }
+
+        function clearSelectedTrend() {
+            selectedTrendId = null;
+            
+            // Remove active classes from all pills
+            document.querySelectorAll('#trendsContainer button').forEach(b => {
+                b.classList.remove('active-trend');
+            });
+
+            // If we are currently previewing something, just update its button back to "Select"
+            if (previewTrendId) {
+                preview2026Trend(previewTrendId);
+            } else {
+                // Fallback in case previewId is lost
+                const infoCard = document.getElementById('trendInfoCard');
+                if (infoCard) infoCard.classList.add('hidden');
+            }
+            showToast("Preset desactivado");
+        }
+
+        function setupDragAndDrop() {
+            const btn = document.getElementById('btnUploadImage');
+            if (!btn) return;
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                btn.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); }, false);
+            });
+        }
+
+        function triggerImageUpload() {
+            const input = document.getElementById('uploadImageInput');
+            if (input) input.click();
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) processImageFile(file);
+            event.target.value = '';
+        }
+
+        async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const res = await fetch(url, options);
+                    if (res.ok) return res;
+                } catch (e) {
+                    if (i === retries - 1) throw e;
+                }
+                await new Promise(r => setTimeout(r, delay * Math.pow(2, i)));
+            }
+            return await fetch(url, options);
+        }
+
+        async function processImageFile(file) {
+            if (!file || !file.type.startsWith('image/')) {
+                showToast("Por favor selecciona una imagen válida.");
+                return;
+            }
+
+            const btnText = document.getElementById('btnUploadText');
+            const btnIcon = document.getElementById('iconUploadImage');
+            const originalText = btnText.innerText;
+
+            btnText.innerText = "ANALIZANDO...";
+            btnIcon.className = "fa-solid fa-spinner fa-spin text-xs";
+            showToast("Analizando imagen con IA...");
+
+            try {
+                const base64Data = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result.split(',')[1]);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+
+                const promptText = "Analyze this image and identify its visual production parameters. Return a JSON object with: subject (in Spanish), style, framing, camera, lighting, composition, aspectRatio.";
+                const apiKey = ""; // API key to be injected securely
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{ role: "user", parts: [{ text: promptText }, { inlineData: { mimeType: file.type || "image/png", data: base64Data } }] }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                subject: { type: "STRING" }, style: { type: "STRING" }, framing: { type: "STRING" },
+                                camera: { type: "STRING" }, lighting: { type: "STRING" }, composition: { type: "STRING" }, aspectRatio: { type: "STRING" }
+                            },
+                            required: ["subject", "style", "framing", "camera", "lighting", "composition", "aspectRatio"]
+                        }
+                    }
+                };
+
+                const response = await fetchWithRetry(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const result = await response.json();
+                const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (jsonText) {
+                    const data = JSON.parse(jsonText);
+                    if (data.subject && !document.getElementById('inputSubject').value.trim()) document.getElementById('inputSubject').value = data.subject;
+                    showToast("¡Parámetros extraídos con éxito!");
+                }
+            } catch (err) {
+                showToast("Error al analizar la imagen.");
+            } finally {
+                btnText.innerText = originalText;
+                btnIcon.className = "fa-solid fa-arrow-up-from-bracket text-xs";
+            }
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.custom-select-dropdown').forEach(d => d.classList.add('hidden'));
+            document.querySelectorAll('.custom-select-trigger').forEach(t => t.classList.remove('active'));
+            const historyDropdown = document.getElementById('historyDropdown');
+            const iconHistory = document.getElementById('iconHistoryChevron');
+            if (historyDropdown) historyDropdown.classList.add('hidden');
+            if (iconHistory) iconHistory.style.transform = 'rotate(0deg)';
+        }
+
+        function buildCustomDropdowns() {
+            selectIds.forEach(id => {
+                const selectEl = document.getElementById(id);
+                if (!selectEl) return;
+
+                let wrapper = selectEl.parentElement;
+                if (!wrapper) return;
+
+                wrapper.classList.add('custom-select-wrapper');
+                let trigger = wrapper.querySelector('.custom-select-trigger');
+                let dropdown = wrapper.querySelector('.custom-select-dropdown');
+
+                if (!trigger) {
+                    trigger = document.createElement('div');
+                    trigger.className = 'custom-select-trigger px-4 py-2.5 rounded-2xl text-xs font-sans font-medium';
+                    trigger.onclick = function(e) {
+                        e.stopPropagation();
+                        const isHidden = dropdown.classList.contains('hidden');
+                        closeAllDropdowns();
+                        if (isHidden) { dropdown.classList.remove('hidden'); trigger.classList.add('active'); }
+                    };
+                    const labelSpan = document.createElement('span'); labelSpan.className = 'truncate mr-2'; trigger.appendChild(labelSpan);
+                    const arrowIcon = document.createElement('i'); arrowIcon.className = 'fa-solid fa-chevron-down text-[10px] text-[#25282B]'; trigger.appendChild(arrowIcon);
+                    wrapper.appendChild(trigger);
+                }
+
+                if (!dropdown) {
+                    dropdown = document.createElement('div');
+                    dropdown.className = 'custom-select-dropdown absolute top-full left-0 right-0 mt-1 rounded-2xl hidden overflow-hidden';
+                    wrapper.appendChild(dropdown);
+                }
+
+                const labelSpan = trigger.querySelector('span');
+                if (labelSpan && selectEl.options[selectEl.selectedIndex]) labelSpan.innerText = selectEl.options[selectEl.selectedIndex].text;
+
+                dropdown.innerHTML = '';
+                Array.from(selectEl.options).forEach((opt, index) => {
+                    const item = document.createElement('div');
+                    item.className = `custom-select-option ${index === selectEl.selectedIndex ? 'selected' : ''}`;
+                    item.innerText = opt.text;
+                    item.onclick = function(e) {
+                        e.stopPropagation(); selectEl.selectedIndex = index; selectEl.dispatchEvent(new Event('change'));
+                        buildCustomDropdowns(); closeAllDropdowns();
+                    };
+                    dropdown.appendChild(item);
+                });
+
+                if (id !== 'selectFavorites') {
+                    const customItem = document.createElement('div');
+                    customItem.className = 'custom-select-option border-t border-[#25282B]/20 flex items-center space-x-1 font-bold';
+                    customItem.innerHTML = '<i class="fa-solid fa-plus text-[10px] mr-1"></i><span>+ Personalizado...</span>';
+                    customItem.onclick = function(e) { e.stopPropagation(); closeAllDropdowns(); openCustomParamModal(id); };
+                    dropdown.appendChild(customItem);
+                }
+            });
+        }
+
+        function updateCustomDropdown(id) {
+            const selectEl = document.getElementById(id);
+            if (!selectEl) return;
+            const wrapper = selectEl.parentElement;
+            if (!wrapper) return;
+            const labelSpan = wrapper.querySelector('.custom-select-trigger span');
+            if (labelSpan && selectEl.options[selectEl.selectedIndex]) labelSpan.innerText = selectEl.options[selectEl.selectedIndex].text;
+            if (id === 'selectFavorites') buildCustomDropdowns();
+        }
+
+        function openCustomParamModal(selectId) {
+            activeCustomSelectId = selectId;
+            const input = document.getElementById('inputCustomParamValue');
+            if (input) input.value = '';
+            document.getElementById('modalCustomParam').classList.remove('hidden');
+        }
+
+        function closeCustomParamModal() {
+            document.getElementById('modalCustomParam').classList.add('hidden');
+            activeCustomSelectId = null;
+        }
+
+        function confirmCustomParam() {
+            const input = document.getElementById('inputCustomParamValue');
+            if (!input || !activeCustomSelectId) return;
+            const val = input.value.trim();
+            if (!val) { showToast("Ingresa un texto para el parámetro."); return; }
+
+            const selectEl = document.getElementById(activeCustomSelectId);
+            if (!selectEl) return;
+
+            const newOpt = document.createElement('option');
+            newOpt.value = val; newOpt.text = `Personalizado: ${val}`; newOpt.selected = true;
+            selectEl.appendChild(newOpt);
+
+            buildCustomDropdowns(); closeCustomParamModal(); showToast("Opción personalizada agregada");
+        }
+
+        function shuffleAestheticTags() {
+            const container = document.getElementById('aestheticTagsContainer');
+            if (!container) return;
+
+            const shuffled = [...aestheticPool].sort(() => 0.5 - Math.random()).slice(0, 6);
+            container.innerHTML = '';
+            shuffled.forEach(item => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.onclick = () => appendAestheticTag(item.text);
+                btn.className = 'px-3.5 py-1.5 rounded-full text-xs btn-outline font-sans font-bold uppercase tracking-wider transition';
+                btn.innerText = item.label;
+                container.appendChild(btn);
+            });
+        }
+
+        function appendAestheticTag(tagText) {
+            const textarea = document.getElementById('inputSubject');
+            if (!textarea) return;
+            textarea.value = textarea.value.trim() === '' ? tagText : textarea.value.trim() + ', ' + tagText;
+            textarea.focus();
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            const btnImg = document.getElementById('btnModeImage');
+            const btnVid = document.getElementById('btnModeVideo');
+            const vidControls = document.getElementById('videoControlsContainer');
+
+            if (mode === 'image') {
+                btnImg.className = "flex items-center space-x-2 px-6 py-2 rounded-full text-xs font-sans font-bold uppercase tracking-wider transition-all duration-300 btn-active";
+                btnVid.className = "flex items-center space-x-2 px-6 py-2 rounded-full text-xs font-sans font-bold uppercase tracking-wider transition-all duration-300 text-[#25282B] hover:bg-[#25282B]/10";
+                vidControls.classList.add('hidden');
+            } else {
+                btnVid.className = "flex items-center space-x-2 px-6 py-2 rounded-full text-xs font-sans font-bold uppercase tracking-wider transition-all duration-300 btn-active";
+                btnImg.className = "flex items-center space-x-2 px-6 py-2 rounded-full text-xs font-sans font-bold uppercase tracking-wider transition-all duration-300 text-[#25282B] hover:bg-[#25282B]/10";
+                vidControls.classList.remove('hidden');
+            }
+        }
+
+        function switchPlatformTab(platform) {
+            currentPlatformTab = platform;
+            const tabNano = document.getElementById('tabNanoBanana');
+            const tabGPT = document.getElementById('tabChatGPT');
+
+            if (platform === 'nanoBanana') {
+                tabNano.className = "px-4 py-1.5 rounded-full text-xs font-sans font-bold uppercase tracking-wider transition-all btn-active";
+                tabGPT.className = "px-4 py-1.5 rounded-full text-xs font-sans font-bold uppercase tracking-wider transition-all text-[#25282B] hover:bg-[#25282B]/10";
+            } else {
+                tabGPT.className = "px-4 py-1.5 rounded-full text-xs font-sans font-bold uppercase tracking-wider transition-all btn-active";
+                tabNano.className = "px-4 py-1.5 rounded-full text-xs font-sans font-bold uppercase tracking-wider transition-all text-[#25282B] hover:bg-[#25282B]/10";
+            }
+            if (generatedPrompts[platform]) document.getElementById('outputMasterPrompt').innerText = generatedPrompts[platform];
+        }
+
+        async function executeBoostPrompt() {
+            const subject = document.getElementById('inputSubject').value.trim();
+            const style = document.getElementById('selectStyle').value;
+            const framing = document.getElementById('selectFraming').value;
+            const camera = document.getElementById('selectCamera').value;
+            const lighting = document.getElementById('selectLighting').value;
+            const composition = document.getElementById('selectComposition').value;
+            const aspectRatio = document.getElementById('selectAspectRatio').value;
+            const cameraMove = document.getElementById('selectCameraMovement') ? document.getElementById('selectCameraMovement').value : '';
+            const pacing = document.getElementById('selectVideoPacing') ? document.getElementById('selectVideoPacing').value : '';
+
+            if (!subject) {
+                showToast("Por favor ingresa una idea en el Basic Prompt primero.");
+                return;
+            }
+
+            const btnText = document.getElementById('btnBoostText');
+            const btnIcon = document.getElementById('btnBoostIcon');
+            btnText.innerText = "IA REESCRIBIENDO...";
+            btnIcon.className = "fa-solid fa-spinner fa-spin text-sm";
+
+            const paramsList = [style, framing, camera, lighting, composition, aspectRatio];
+            if (currentMode === 'video') {
+                if (cameraMove) paramsList.push(cameraMove);
+                if (pacing) paramsList.push(pacing);
+            }
+            const activeParams = paramsList.filter(p => p !== '');
+
+            let selectedTrendKeywords = '';
+            let selectedTrendName = '';
+            let selectedTrendNegatives = '';
+            
+            // Only inject the trend IF it has been explicitly selected/applied
+            if (selectedTrendId) {
+                const trendObj = trends2026Data.find(t => t.id === selectedTrendId);
+                if (trendObj) {
+                    selectedTrendName = trendObj.name;
+                    selectedTrendKeywords = trendObj.keywords || '';
+                    selectedTrendNegatives = trendObj.negative || '';
+                }
+            }
+
+            try {
+                // Modified System Prompt to include negative elements
+                const systemPrompt = `You are an elite Senior Art Director and AI Prompt Engineer. Translate the user's idea into fluent English and completely rewrite/expand it into an integrated, highly descriptive visual prompt. Incorporate technical specs and design trend keywords naturally.
+
+User Basic Concept: "${subject}"
+Mode: ${currentMode.toUpperCase()}
+Parameters: ${activeParams.join(' | ')}
+Applied Trend: ${selectedTrendName ? `${selectedTrendName} (Tokens to inject: ${selectedTrendKeywords})` : 'None'}
+Elements to Strictly Avoid: ${selectedTrendNegatives ? selectedTrendNegatives : 'Standard generic AI traits.'}
+
+Return JSON with keys: "nanoBanana" (integrated visual prompt in English), "chatGPT" (structured art direction brief), "shot1", "shot2", "shot3".`;
+
+                const apiKey = ""; // API key to be injected securely
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{ role: "user", parts: [{ text: systemPrompt }] }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                nanoBanana: { type: "STRING" }, chatGPT: { type: "STRING" },
+                                shot1: { type: "STRING" }, shot2: { type: "STRING" }, shot3: { type: "STRING" }
+                            },
+                            required: ["nanoBanana", "chatGPT", "shot1", "shot2", "shot3"]
+                        }
+                    }
+                };
+
+                const response = await fetchWithRetry(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const result = await response.json();
+                const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (jsonText) {
+                    const data = JSON.parse(jsonText);
+                    generatedPrompts.nanoBanana = data.nanoBanana;
+                    generatedPrompts.chatGPT = data.chatGPT;
+                    sequencePrompts.shot1 = data.shot1;
+                    sequencePrompts.shot2 = data.shot2;
+                    sequencePrompts.shot3 = data.shot3;
+                } else {
+                    throw new Error("Empty response");
+                }
+            } catch (err) {
+                generatedPrompts.nanoBanana = `A cinematic ${currentMode} composition depicting ${subject}. ${activeParams.join('. ')}. ${selectedTrendKeywords}. Avoid: ${selectedTrendNegatives}`;
+                generatedPrompts.chatGPT = `[ART DIRECTION BRIEF]\nConcept: ${subject}\nParameters: ${activeParams.join(' | ')}`;
+                sequencePrompts.shot1 = `Shot 1: Wide establishing shot of ${subject}.`;
+                sequencePrompts.shot2 = `Shot 2: Medium action shot of ${subject}.`;
+                sequencePrompts.shot3 = `Shot 3: Close-up macro detail of ${subject}.`;
+            } finally {
+                document.getElementById('outputMasterPrompt').innerText = generatedPrompts[currentPlatformTab];
+                document.getElementById('shot1Text').innerText = sequencePrompts.shot1;
+                document.getElementById('shot2Text').innerText = sequencePrompts.shot2;
+                document.getElementById('shot3Text').innerText = sequencePrompts.shot3;
+
+                document.getElementById('adjustPromptSection').classList.remove('hidden');
+
+                btnText.innerText = "BOOST PROMPT";
+                btnIcon.className = "fa-solid fa-bolt text-sm";
+
+                const titleSnippet = subject.length > 28 ? subject.substring(0, 28) + '...' : subject;
+                saveToHistory({
+                    id: Date.now(), timestamp: Date.now(), title: titleSnippet, subject: subject, mode: currentMode,
+                    style: style, framing: framing, camera: camera, lighting: lighting, composition: composition, aspectRatio: aspectRatio,
+                    selectedTrendId: selectedTrendId,
+                    generatedPrompts: { ...generatedPrompts }, sequencePrompts: { ...sequencePrompts }
+                });
+
+                copyMasterPrompt();
+            }
+        }
+
+        function generateAlternativeVariation() {
+            if (!generatedPrompts.nanoBanana) { showToast("Genera un prompt primero."); return; }
+            variationIndex = (variationIndex + 1) % variationModifiers.length;
+            const modifier = variationModifiers[variationIndex];
+
+            generatedPrompts.nanoBanana += `, alternative aesthetic emphasis: ${modifier}`;
+            document.getElementById('outputMasterPrompt').innerText = generatedPrompts[currentPlatformTab];
+            showToast("Nueva variación generada");
+        }
+
+        function copyMasterPrompt() {
+            const textToCopy = document.getElementById('outputMasterPrompt').innerText;
+            if (!textToCopy || textToCopy.includes("Haz clic en")) return;
+            copyToClipboard(textToCopy);
+            showToast("Prompt copiado al portapapeles");
+        }
+
+        function copyShotPrompt(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            if (!text) return;
+            copyToClipboard(text);
+            showToast("Paso copiado al portapapeles");
+        }
+
+        function copyToClipboard(text) {
+            try {
+                const tempTextArea = document.createElement("textarea");
+                tempTextArea.value = text;
+                tempTextArea.style.position = "fixed"; tempTextArea.style.left = "-999999px";
+                document.body.appendChild(tempTextArea);
+                tempTextArea.focus(); tempTextArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempTextArea);
+            } catch (err) { console.warn('Copy error:', err); }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toastNotification');
+            const toastMsg = document.getElementById('toastMessage');
+            toastMsg.innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 2500);
+        }
+
+        function toggleNarrativeSequence() {
+            const container = document.getElementById('narrativeSequenceContainer');
+            if (container) container.classList.toggle('hidden');
+        }
+
+        async function applyPromptAdjustment() {
+            const adj = document.getElementById('inputAdjustPrompt').value.trim();
+            if (!adj) return;
+            generatedPrompts.nanoBanana += `, modified with: ${adj}`;
+            document.getElementById('outputMasterPrompt').innerText = generatedPrompts[currentPlatformTab];
+            document.getElementById('inputAdjustPrompt').value = '';
+            showToast("Ajuste integrado con éxito");
+        }
+
+        function resetAllFields() {
+            document.getElementById('inputSubject').value = '';
+            selectIds.forEach(id => {
+                const selectEl = document.getElementById(id);
+                if (selectEl) { selectEl.selectedIndex = 0; updateCustomDropdown(id); }
+            });
+            clearSelectedTrend(); // Clears applied trend
+            previewTrendId = null; // Clears preview
+            
+            document.getElementById('trendInfoCard').classList.add('hidden');
+            document.getElementById('outputMasterPrompt').innerText = 'Haz clic en "BOOST PROMPT" para que la IA traduzca y estructure tu idea en un prompt profesional en inglés...';
+            document.getElementById('adjustPromptSection').classList.add('hidden');
+            document.getElementById('narrativeSequenceContainer').classList.add('hidden');
+            showToast("Formulario restablecido");
+        }
+
+        function openSaveFavoriteModal() { document.getElementById('modalSaveFavorite').classList.remove('hidden'); }
+        function closeSaveFavoriteModal() { document.getElementById('modalSaveFavorite').classList.add('hidden'); }
+
+        function confirmSaveFavorite() {
+            const nameInput = document.getElementById('favoriteNameInput').value.trim();
+            if (!nameInput) { showToast("Ingresa un nombre para el favorito."); return; }
+            closeSaveFavoriteModal();
+            showToast("Favorito guardado");
+        }
+
+        function loadStoredFavorites() {
+            const select = document.getElementById('selectFavorites');
+            if (!select) return;
+            select.innerHTML = `<option value="">Mis Favoritos (0)</option>`;
+            updateCustomDropdown('selectFavorites');
+        }
+
+        function loadFavorite(index) {
+            if (index === '') return;
+            showToast("Favorito cargado");
+        }
+    </script>
+</body>
+</html>
