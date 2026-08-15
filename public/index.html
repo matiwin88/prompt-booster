@@ -1192,8 +1192,6 @@
             let selectedTrendKeywords = '';
             let selectedTrendName = '';
             let selectedTrendNegatives = '';
-            
-            // Only inject the trend IF it has been explicitly selected/applied
             if (selectedTrendId) {
                 const trendObj = trends2026Data.find(t => t.id === selectedTrendId);
                 if (trendObj) {
@@ -1204,18 +1202,26 @@
             }
 
             try {
-                // Modified System Prompt to include negative elements
-                const systemPrompt = `You are an elite Senior Art Director and AI Prompt Engineer. Translate the user's idea into fluent English and completely rewrite/expand it into an integrated, highly descriptive visual prompt. Incorporate technical specs and design trend keywords naturally.
+                const systemPrompt = `You are an elite Senior Art Director and AI Prompt Engineer for image/video generation.
+CRITICAL INSTRUCTIONS: 
+1. You MUST translate the user's idea into fluent ENGLISH, no matter what language it was written in.
+2. Optimize and expand the prompt to be highly descriptive, clear, and precise for generative AI models (like Midjourney or Runway). 
+3. Incorporate all technical specs, lighting, camera, and 2026 design trend keywords naturally into a cohesive description.
 
 User Basic Concept: "${subject}"
 Mode: ${currentMode.toUpperCase()}
 Parameters: ${activeParams.join(' | ')}
-Applied Trend: ${selectedTrendName ? `${selectedTrendName} (Tokens to inject: ${selectedTrendKeywords})` : 'None'}
-Elements to Strictly Avoid: ${selectedTrendNegatives ? selectedTrendNegatives : 'Standard generic AI traits.'}
+Trend: ${selectedTrendName ? `${selectedTrendName} (Tokens to inject: ${selectedTrendKeywords})` : 'None'}
+Elements to Strictly Avoid (Negative Prompt): ${selectedTrendNegatives ? selectedTrendNegatives : 'Standard generic AI traits, low quality, unpolished.'}
 
-Return JSON with keys: "nanoBanana" (integrated visual prompt in English), "chatGPT" (structured art direction brief), "shot1", "shot2", "shot3".`;
+Return a valid JSON object with the following keys EXACTLY:
+"nanoBanana": "The final optimized, translated, and highly descriptive visual prompt in English."
+"chatGPT": "A structured art direction brief in English."
+"shot1": "Wide establishing shot description in English."
+"shot2": "Medium action shot description in English."
+"shot3": "Close-up macro detail description in English."`;
 
-                const apiKey = ""; // API key to be injected securely
+                const apiKey = "";
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
                 const payload = {
